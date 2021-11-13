@@ -1,16 +1,20 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.http import JsonResponse
-from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import IsAuthenticated
 from yaml import load as load_yaml
 from yaml.loader import Loader
-from api.models import Shop, Category, ProductInfo, Product, Parameter, ProductParameter
+from .models import Shop, Category, ProductInfo, Product, Parameter, ProductParameter
+from .permissions import IsPartner
 
 
-class PartnerUpdate(APIView):
+class PartnerUpdate(GenericAPIView):
     """
     Класс для обновления прайса от поставщика
     """
+
+    permission_classes = (IsAuthenticated, IsPartner,)
 
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
