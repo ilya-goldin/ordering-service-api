@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from dotenv import dotenv_values
 
@@ -5,7 +6,7 @@ config = dotenv_values('.env')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config.get('SECRET_KEY')
+SECRET_KEY = 'django-insecure-&i0lbk65z(%=l98c_f^l4$^11g$p47mvck629%doj_bvz31cgv'
 
 if config.get('DEBUG'):
     DEBUG = True
@@ -15,7 +16,7 @@ else:
 if DEBUG:
     ALLOWED_HOSTS = ['*']
 else:
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = ['https://example.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -25,6 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_rest_passwordreset',
     'api',
 ]
@@ -59,15 +61,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ordering_service.wsgi.application'
 
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'ordering_service',
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ordering_service',
     }
-else:
-    DATABASES = {}
+}
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -95,6 +94,43 @@ USE_L10N = True
 
 USE_TZ = True
 
+STATIC_ROOT = ''
+
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [os.path.join('static')]
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'api.User'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_USE_TLS = True
+
+EMAIL_HOST = 'smtp.mail.ru'
+
+EMAIL_HOST_USER = 'netology-pdiplom@mail.ru'
+
+EMAIL_HOST_PASSWORD = 'i~8W4rdRPFlo'
+
+EMAIL_PORT = '465'
+
+EMAIL_USE_SSL = True
+
+SERVER_EMAIL = EMAIL_HOST_USER
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 40,
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+}
