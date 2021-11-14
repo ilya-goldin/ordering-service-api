@@ -17,3 +17,6 @@ Order automation for the retail chain. Users of the service are the buyer (the m
 
   python manage.py createsuperuser 
 ```
+
+## Tests coverage
+![Tests coverage screenshot](static/Screenshot%20from%202021-11-14%2018-08-04.png)
