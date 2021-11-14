@@ -86,7 +86,7 @@ def test_sign_in(api_client, user, is_active, password, http_response):
     ['auth', 'http_response', 'count'],
     (
         (True, status.HTTP_200_OK, 1),
-        (False, status.HTTP_401_UNAUTHORIZED, 0),
+        (False, status.HTTP_403_FORBIDDEN, 0),
     )
 )
 @pytest.mark.django_db
@@ -108,7 +108,7 @@ def test_get_account_details(api_client, api_client_auth, auth, http_response, c
     ['auth', 'http_response'],
     (
         (True, status.HTTP_404_NOT_FOUND),
-        (False, status.HTTP_401_UNAUTHORIZED),
+        (False, status.HTTP_403_FORBIDDEN),
     )
 )
 @pytest.mark.django_db
@@ -128,7 +128,7 @@ def test_get_account_details_fail(api_client, api_client_auth, user_factory, aut
     ['auth', 'http_response'],
     (
         (True, status.HTTP_200_OK),
-        (False, status.HTTP_401_UNAUTHORIZED),
+        (False, status.HTTP_403_FORBIDDEN),
     )
 )
 @pytest.mark.django_db
@@ -245,7 +245,7 @@ def test_get_products_info(api_client, product_info):
 def test_list_cart(api_client_auth, order_items):
     url = reverse("api:cart-list")
     api_client, user = api_client_auth
-    order_items(user_id=user.id, status='basket')
+    order_items(user_id=user.id, status='cart')
 
     resp = api_client.get(url)
     resp_json = resp.json()
@@ -254,7 +254,7 @@ def test_list_cart(api_client_auth, order_items):
     for item in resp_json:
         assert item['id']
         assert item['total_sum']
-        assert item['status'] == 'basket'
+        assert item['status'] == 'cart'
 
 
 @pytest.mark.django_db
@@ -277,7 +277,7 @@ def test_create_cart(api_client_auth, product_info):
 @pytest.mark.django_db
 def test_update_cart(api_client_auth, order_items):
     api_client, user = api_client_auth
-    order_item = order_items(user_id=user.id, status='basket')
+    order_item = order_items(user_id=user.id, status='cart')
     items = [{'id': order_item.id, 'quantity': randint(1, 5)}]
     items = json.dumps(items)
     url = reverse('api:cart-detail', args=(order_item.order.id,))
@@ -294,7 +294,7 @@ def test_update_cart(api_client_auth, order_items):
 @pytest.mark.django_db
 def test_delete_cart(api_client_auth, order_items):
     api_client, user = api_client_auth
-    order_item = order_items(user_id=user.id, status='basket')
+    order_item = order_items(user_id=user.id, status='cart')
     items = [order_item.id]
     url = reverse('api:cart-detail', args=(order_item.order.id,))
 
@@ -305,3 +305,19 @@ def test_delete_cart(api_client_auth, order_items):
 
     assert resp.status_code == status.HTTP_200_OK
     assert resp_json.get('Удалено объектов', 0) > 0
+
+
+@pytest.mark.django_db
+def test_create_order(api_client_auth, order_items):
+    url = reverse("api:cart-list")
+    api_client, user = api_client_auth
+    order_items(user_id=user.id, status='cart')
+
+    resp = api_client.get(url)
+    resp_json = resp.json()
+
+    assert resp.status_code == status.HTTP_200_OK
+    for item in resp_json:
+        assert item['id']
+        assert item['total_sum']
+        assert item['status'] == 'cart'
