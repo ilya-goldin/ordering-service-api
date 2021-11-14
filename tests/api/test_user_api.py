@@ -307,17 +307,40 @@ def test_delete_cart(api_client_auth, order_items):
     assert resp_json.get('Удалено объектов', 0) > 0
 
 
+@pytest.mark.parametrize(
+    ['status_', 'bool_'],
+    (
+        ('cart', False),
+        ('new', True),
+        ('confirmed', True),
+        ('assembled', True),
+        ('sent', True),
+        ('delivered', True),
+        ('canceled', True),
+    )
+)
 @pytest.mark.django_db
-def test_create_order(api_client_auth, order_items):
-    url = reverse("api:cart-list")
+def test_get_order(api_client_auth, order_items, status_, bool_):
+    url = reverse("api:order-list")
     api_client, user = api_client_auth
-    order_items(user_id=user.id, status='cart')
+    order_items(user_id=user.id, status=status_)
 
     resp = api_client.get(url)
     resp_json = resp.json()
 
     assert resp.status_code == status.HTTP_200_OK
-    for item in resp_json:
-        assert item['id']
-        assert item['total_sum']
-        assert item['status'] == 'cart'
+    assert bool(resp_json) == bool_
+
+
+@pytest.mark.django_db
+def test_create_order(api_client_auth, order_items):
+    url = reverse("api:order-list")
+    api_client, user = api_client_auth
+    order = order_items(user_id=user.id, status='cart').order
+
+    resp = api_client.post(url, data={
+        'id': order.id,
+        'contact': user.contacts.get().id,
+    })
+
+    assert resp.status_code == status.HTTP_201_CREATED
