@@ -216,7 +216,7 @@ class PartnerOrdersViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
     def get_queryset(self):
         orders = Order.objects.filter(
             ordered_items__product_info__shop_id=self.request.user.shop.id
-        ).exclude(status='basket').prefetch_related(
+        ).exclude(status='cart').prefetch_related(
             'ordered_items__product_info__product__category',
             'ordered_items__product_info__product_parameters__parameter').select_related('contact').annotate(
             total_sum=Sum(F('ordered_items__quantity') * F('ordered_items__product_info__price'))).distinct()
@@ -274,7 +274,7 @@ class CartViewSet(viewsets.GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         cart = Order.objects.filter(
-            user_id=request.user.id, status='basket').prefetch_related(
+            user_id=request.user.id, status='cart').prefetch_related(
             'ordered_items__product_info__product__category',
             'ordered_items__product_info__product_parameters__parameter').annotate(
             total_sum=Sum(F('ordered_items__quantity') * F('ordered_items__product_info__price'))).distinct()
@@ -315,7 +315,7 @@ class CartViewSet(viewsets.GenericViewSet):
             items_list = items_sting.split(',')
             cart, _ = Order.objects.get_or_create(
                 user_id=request.user.id,
-                status='basket',
+                status='cart',
             )
             query = Q()
             objects_deleted = False
@@ -338,7 +338,7 @@ class CartViewSet(viewsets.GenericViewSet):
             else:
                 cart, _ = Order.objects.get_or_create(
                     user_id=request.user.id,
-                    status='basket',
+                    status='cart',
                 )
                 objects_updated = 0
                 for order_item in items_dict:
@@ -357,11 +357,12 @@ class OrderViewSet(viewsets.GenericViewSet):
     """
     Класс для получения и размещения заказов пользователями
     """
+
     permission_classes = (IsAuthenticated,)
 
     def list(self, request, *args, **kwargs):
         order = Order.objects.filter(
-            user_id=request.user.id).exclude(state='basket').prefetch_related(
+            user_id=request.user.id).exclude(status='cart').prefetch_related(
             'ordered_items__product_info__product__category',
             'ordered_items__product_info__product_parameters__parameter').select_related('contact').annotate(
             total_sum=Sum(F('ordered_items__quantity') * F('ordered_items__product_info__price'))).distinct()
@@ -375,7 +376,7 @@ class OrderViewSet(viewsets.GenericViewSet):
                     is_updated = Order.objects.filter(
                         user_id=request.user.id, id=request.data['id']).update(
                         contact_id=request.data['contact'],
-                        state='new')
+                        status='new')
                 except IntegrityError as error:
                     print(error)
                     return Response({'Errors': 'Неправильно указаны аргументы'}, status=status.HTTP_400_BAD_REQUEST)
