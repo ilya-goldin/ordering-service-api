@@ -1,0 +1,7 @@
+Django~=3.2.9
+djangorestframework~=3.12.4
+requests~=2.26.0
+PyYAML~=6.0
+pytest~=6.2.5
+Faker~=9.8.1
+python-dotenv~=0.19.2
