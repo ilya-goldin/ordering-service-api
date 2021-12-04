@@ -5,3 +5,4 @@ PyYAML~=6.0
 pytest~=6.2.5
 Faker~=9.8.1
 python-dotenv~=0.19.2
+drf-spectacular~=0.21.0

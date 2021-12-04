@@ -1,7 +1,7 @@
 from django.urls import path, include
 from django_rest_passwordreset.views import reset_password_request_token, reset_password_confirm
-from .views import PartnerUpdateViewSet, PartnerStateViewSet, PartnerOrdersViewSet, SignUpViewSet,\
-    EmailConfirmViewSet, AccountDetailsViewSet, ContactViewSet, SignInViewSet, CategoryViewSet,\
+from .views import PartnerUpdateViewSet, PartnerStateViewSet, PartnerOrdersViewSet, SignUpViewSet, \
+    EmailConfirmViewSet, AccountDetailsViewSet, ContactViewSet, SignInViewSet, CategoryViewSet, \
     ShopViewSet, ProductInfoViewSet, CartViewSet, OrderViewSet
 from rest_framework.routers import DefaultRouter
 
