@@ -27,7 +27,7 @@ class SignUpViewSet(viewsets.GenericViewSet):
     Класс для регистрации покупателей
     """
 
-    throttle_classes = AnonRateThrottle
+    throttle_classes = (AnonRateThrottle,)
 
     def create(self, request, *args, **kwargs):
         if {'username', 'email', 'password', }.issubset(request.data):
@@ -59,7 +59,7 @@ class SignUpViewSet(viewsets.GenericViewSet):
                         [token.user.email]
                     )
                     msg.send()
-                    login(request, user)
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                     return Response(user_serializer.data, status=status.HTTP_201_CREATED)
                 else:
                     return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -71,7 +71,7 @@ class EmailConfirmViewSet(viewsets.GenericViewSet):
     Класс для подтверждения почты
     """
 
-    throttle_classes = UserRateThrottle
+    throttle_classes = (UserRateThrottle,)
 
     def create(self, request, *args, **kwargs):
         if {'email', 'token'}.issubset(request.data):
@@ -96,7 +96,7 @@ class AccountDetailsViewSet(viewsets.ModelViewSet):
 
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
-    throttle_classes = UserRateThrottle
+    throttle_classes = (UserRateThrottle,)
 
     def get_queryset(self):
         return User.objects.filter(id=self.request.user.id)
@@ -109,7 +109,7 @@ class ContactViewSet(viewsets.ModelViewSet):
 
     serializer_class = ContactSerializer
     permission_classes = (IsAuthenticated,)
-    throttle_classes = UserRateThrottle
+    throttle_classes = (UserRateThrottle,)
 
     def get_queryset(self):
         queryset = Contact.objects.filter(user=self.request.user.id)
@@ -120,6 +120,8 @@ class SignInViewSet(viewsets.GenericViewSet):
     """
     Класс для авторизации пользователя
     """
+
+    throttle_classes = (AnonRateThrottle,)
 
     def create(self, request, *args, **kwargs):
         if {'email', 'password'}.issubset(request.data):
@@ -138,7 +140,7 @@ class PartnerUpdateViewSet(viewsets.GenericViewSet):
     """
 
     permission_classes = (IsAuthenticated, IsPartner,)
-    throttle_classes = UserRateThrottle
+    throttle_classes = (UserRateThrottle,)
 
     def create(self, request, *args, **kwargs):
         url = request.data.get('url')
@@ -196,7 +198,7 @@ class PartnerStateViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
 
     permission_classes = (IsAuthenticated, IsPartner, IsShopOwner,)
     serializer_class = ShopSerializer
-    throttle_classes = UserRateThrottle
+    throttle_classes = (UserRateThrottle,)
 
     def patch(self, request, *args, **kwargs):
         state = request.data.get('state')
@@ -221,7 +223,7 @@ class PartnerOrdersViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
 
     permission_classes = (IsAuthenticated, IsPartner,)
     serializer_class = OrderSerializer
-    throttle_classes = UserRateThrottle
+    throttle_classes = (UserRateThrottle,)
 
     def get_queryset(self):
         orders = Order.objects.filter(
@@ -241,7 +243,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    throttle_classes = AnonRateThrottle
+    throttle_classes = (AnonRateThrottle,)
 
 
 class ShopViewSet(viewsets.ModelViewSet):
@@ -252,7 +254,7 @@ class ShopViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
-    throttle_classes = AnonRateThrottle
+    throttle_classes = (AnonRateThrottle,)
 
 
 class ProductInfoViewSet(viewsets.GenericViewSet):
@@ -260,7 +262,7 @@ class ProductInfoViewSet(viewsets.GenericViewSet):
     Класс для поиска товаров
     """
 
-    throttle_classes = AnonRateThrottle
+    throttle_classes = (AnonRateThrottle,)
 
     def list(self, request, *args, **kwargs):
         query = Q(shop__state=True)
@@ -285,7 +287,7 @@ class CartViewSet(viewsets.GenericViewSet):
     """
 
     permission_classes = (IsAuthenticated,)
-    throttle_classes = UserRateThrottle
+    throttle_classes = (UserRateThrottle,)
 
     def list(self, request, *args, **kwargs):
         cart = Order.objects.filter(
@@ -374,7 +376,7 @@ class OrderViewSet(viewsets.GenericViewSet):
     """
 
     permission_classes = (IsAuthenticated,)
-    throttle_classes = UserRateThrottle
+    throttle_classes = (UserRateThrottle,)
 
     def list(self, request, *args, **kwargs):
         order = Order.objects.filter(
